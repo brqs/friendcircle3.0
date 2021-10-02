@@ -1,0 +1,37 @@
+# 文章更新
+name: update-friends-posts
+
+on: 
+  release:
+    types: [published]
+  push:
+    tags:
+    - 'v*'
+  #  branches: 
+  #    - master
+  schedule:
+    - cron: "*/30 0,4,9,14 * * *"
+  watch:
+    types: [started]
+   
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id  # 自己点的 start
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Set up Python #安装python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - name: Install requirements #安装requests
+      run: |
+        pip install -r requirements.txt
+    - name: Update posts #更新
+      env:
+        $APP_ID: ${{ secrets.APPID }} 
+        $APP_KEY: ${{ secrets.APPKEY }}
+        $LINK: ${{ secrets.LINK }} 
+      run: | 
+        python run.py ${{ secrets.APPID }} ${{ secrets.APPKEY }}  ${{ secrets.LINK }}
